@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temporary Data & Code Sharing</title>
+    <style>
+
+        .creator-bg {
+            position: fixed;
+            top: 32px;
+            right: 48px;
+            left: auto;
+            transform: none;
+            font-size: 3vw;
+            font-family: 'Bebas Neue', 'Segoe UI', Arial, sans-serif;
+            font-weight: 900;
+            color: #111;
+            letter-spacing: 8px;
+            z-index: 10;
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+            text-shadow: 0 2px 8px #bbb;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
+            margin: 0; padding: 0;
+        }
+        .container {
+            max-width: 650px;
+            margin: 48px auto;
+            background: #fff;
+            padding: 40px 32px 32px 32px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+            border: 1px solid #e0eafc;
+            position: relative;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h1 {
+            text-align: center;
+            color: #111;
+            letter-spacing: 2px;
+            margin-bottom: 28px;
+            font-size: 2.3rem;
+            font-weight: 700;
+            text-shadow: 0 2px 8px #bcd0ee;
+        }
+        label {
+            display: block;
+            margin-top: 18px;
+            color: #111;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            border: 1.5px solid #bcd0ee;
+            border-radius: 8px;
+            font-size: 17px;
+            background: #f7fafd;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        input[type="text"]:focus, input[type="file"]:focus {
+            border-color: #111;
+            outline: none;
+            box-shadow: 0 0 8px #bcd0ee;
+        }
+        button {
+            margin-top: 20px;
+            padding: 13px 32px;
+            background: linear-gradient(90deg, #222 0%, #444 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 700;
+            box-shadow: 0 2px 12px rgba(0,120,215,0.10);
+            transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            background: linear-gradient(90deg, #111 0%, #222 100%);
+            transform: scale(1.07);
+            box-shadow: 0 4px 18px rgba(0,120,215,0.18);
+        }
+        .uploads {
+            margin-top: 44px;
+        }
+        .upload-item {
+            background: #e9e9e9;
+            padding: 18px 16px 14px 16px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+            position: relative;
+            border-left: 5px solid #0078d7;
+        }
+        .upload-item span {
+            font-weight: bold;
+            color: #111;
+        }
+        .upload-item a {
+            color: #2d3a4a;
+            text-decoration: none;
+            font-weight: 500;
+            margin-left: 8px;
+            transition: color 0.2s;
+        }
+        .upload-item a:hover {
+            color: #111;
+            text-decoration: underline;
+        }
+        .upload-item .expiry {
+            float: right;
+            color: #888;
+            font-size: 13px;
+            font-style: italic;
+        }
+        .notes-section {
+            background: #f7fafd;
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(0,120,215,0.07);
+            padding: 24px 18px 18px 18px;
+            margin-bottom: 32px;
+            border: 1px solid #e0eafc;
+        }
+        .notes-section h2 {
+            color: #111;
+            margin-bottom: 12px;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        .notes-section textarea {
+            font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+            background: #f4f8fb;
+            border: 1.5px solid #bcd0ee;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .notes-section textarea:focus {
+            border-color: #111;
+            box-shadow: 0 0 8px #bcd0ee;
+        }
+        .note-item {
+            background: #f7f7fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,120,215,0.06);
+            padding: 14px 12px 10px 12px;
+            margin-bottom: 16px;
+            border-left: 4px solid #00c6fb;
+            position: relative;
+        }
+        .note-item pre {
+            background: #e9e9e9;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 8px 0 0 0;
+            font-size: 15px;
+            white-space: pre-wrap;
+        }
+        .note-item .expiry {
+            float: right;
+            color: #888;
+            font-size: 13px;
+            font-style: italic;
+        }
+        .note-item button {
+            margin-top: 8px;
+            padding: 6px 14px;
+            font-size: 14px;
+            background: linear-gradient(90deg, #222 0%, #444 100%);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,120,215,0.08);
+            transition: background 0.3s, transform 0.2s;
+        }
+        .note-item button:hover {
+            background: linear-gradient(90deg, #111 0%, #222 100%);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="creator-bg">Tanish Khan</div>
+    <div class="container">
+        <h1>Temporary Data & Code Sharing</h1>
+        <form id="uploadForm">
+            <label for="username">Your Name:</label>
+            <input type="text" id="username" required>
+            <div id="nameWarning" style="color:#d8000c;background:#ffd2d2;padding:8px 12px;border-radius:6px;margin-top:8px;display:none;font-weight:600;">Please enter your name before uploading or sending a note.</div>
+            <label for="fileInput">Select File to Upload:</label>
+            <input type="file" id="fileInput" required>
+            <button type="submit">Upload</button>
+        </form>
+
+        <div class="notes-section" style="margin-top:32px;">
+            <h2>Send a Note or Code Snippet</h2>
+            <form id="noteForm">
+                <label for="noteInput">Enter note or code:</label>
+                <textarea id="noteInput" rows="4" style="width:100%;padding:10px;border-radius:6px;border:1px solid #bcd0ee;font-size:15px;resize:vertical;" required></textarea>
+                <button type="submit">Send Note/Code</button>
+            </form>
+            <div id="notesList" style="margin-top:24px;"></div>
+        </div>
+
+        <div class="uploads" id="uploads">
+            <h2>Shared Files</h2>
+            <!-- Uploaded files will appear here -->
+        </div>
+    </div>
+    <script>
+        // Simulate temporary storage in memory (for demo only)
+        let uploads = [];
+        let notes = [];
+        const uploadsDiv = document.getElementById('uploads');
+        const uploadForm = document.getElementById('uploadForm');
+        const noteForm = document.getElementById('noteForm');
+        const noteInput = document.getElementById('noteInput');
+        const notesList = document.getElementById('notesList');
+
+        function renderUploads() {
+            const list = uploads.map((item, idx) => `
+                <div class="upload-item">
+                    <span>${item.username}</span> shared: <a href="${item.url}" download="${item.filename}">${item.filename}</a>
+                    <span class="expiry">(expires in ${item.expiry}s)</span>
+                </div>
+            `).join('');
+            uploadsDiv.innerHTML = '<h2>Shared Files</h2>' + (list || '<p style="color:#888;">No files uploaded yet.</p>');
+        }
+
+        function renderNotes() {
+            const list = notes.slice().reverse().map((item, idx) => `
+                <div class="note-item">
+                    <span>${item.username}</span> sent:
+                    <pre>${item.text}</pre>
+                    <button onclick="navigator.clipboard.writeText(notes[notes.length-1-idx].text)">Copy</button>
+                    <span class="expiry">(expires in ${item.expiry}s)</span>
+                </div>
+            `).join('');
+            notesList.innerHTML = list || '<p style="color:#888;">No notes or code sent yet.</p>';
+        }
+
+        function expireUploads() {
+            const now = Date.now();
+            uploads = uploads.filter(item => now < item.expireAt);
+            renderUploads();
+        }
+        function expireNotes() {
+            const now = Date.now();
+            notes = notes.filter(item => now < item.expireAt);
+            renderNotes();
+        }
+
+        setInterval(() => {
+            uploads.forEach(item => {
+                item.expiry = Math.max(0, Math.floor((item.expireAt - Date.now())/1000));
+            });
+            notes.forEach(item => {
+                item.expiry = Math.max(0, Math.floor((item.expireAt - Date.now())/1000));
+            });
+            expireUploads();
+            expireNotes();
+        }, 1000);
+
+        uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            const nameWarning = document.getElementById('nameWarning');
+            if (!username) {
+                nameWarning.style.display = 'block';
+                document.getElementById('username').focus();
+                return;
+            } else {
+                nameWarning.style.display = 'none';
+            }
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const url = evt.target.result;
+                const expireAt = Date.now() + 60*1000; // 1 minute expiry
+                uploads.push({
+                    username,
+                    filename: file.name,
+                    url,
+                    expireAt,
+                    expiry: 60
+                });
+                renderUploads();
+                fileInput.value = '';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        noteForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const text = noteInput.value.trim();
+            const nameWarning = document.getElementById('nameWarning');
+            if (!username) {
+                nameWarning.style.display = 'block';
+                document.getElementById('username').focus();
+                return;
+            } else {
+                nameWarning.style.display = 'none';
+            }
+            if (!text) return;
+            const expireAt = Date.now() + 15*60*1000; // 15 minutes expiry
+            notes.push({
+                username,
+                text,
+                expireAt,
+                expiry: 900
+            });
+            renderNotes();
+            noteInput.value = '';
+        });
+
+        renderUploads();
+        renderNotes();
+    </script>
+</body>
+</html>
